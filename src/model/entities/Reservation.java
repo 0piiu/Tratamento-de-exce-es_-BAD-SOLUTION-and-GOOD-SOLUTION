@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
+import model.exceptions.DomainExceptions;
+
 
 public class Reservation {
 
@@ -13,11 +15,15 @@ public class Reservation {
 	
 	public static DateTimeFormatter format = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 	
+	
 	public Reservation() {
 		
 	}
 	
-	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate checkOut) {
+	public Reservation(Integer roomNumber, LocalDate checkIn, LocalDate checkOut){
+		if (!checkOut.isAfter(checkIn)) {
+			throw new DomainExceptions("Check-out date must be after check-in date");
+		}
 		this.roomNumber = roomNumber;
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
@@ -43,20 +49,19 @@ public class Reservation {
 		return ChronoUnit.DAYS.between(checkIn, checkOut);
 	}
 	
-	public String updateDates(LocalDate checkIn, LocalDate checkOut) {
+	public void updateDates(LocalDate checkIn, LocalDate checkOut){
 		
 		LocalDate now =  LocalDate.now();
-		if(checkIn.isBefore(now) || checkOut.isBefore(now)) { // verifiação, no metododo responsavel, DELEGAÇÃO ---> cria logica para que a reserva so possa ser criada em datas futuras em relaçao a agora (now)
-			return "Error in reservation: Reservation dates for updates must be futures dates ";
+		if(checkIn.isBefore(now) || checkOut.isBefore(now)) { // verifiação, lançando exceção, DELEGAÇÃO ---> cria logica para que a reserva so possa ser criada em datas futuras em relaçao a agora (now)
+			throw new DomainExceptions("Error in reservation: Reservation dates for updates must be futures dates ");
 		}
-		if (!checkOut.isAfter(checkIn)) { // verifiação, no metododo responsavel, DELEGAÇÃO
-				return"Error in reservation: check-out date must be after check-in date";
+		if (!checkOut.isAfter(checkIn)) { //  verifiação,lançando exceção, DELEGAÇÃO ---> checkOut deve ser depois do checkIn 
+			throw new DomainExceptions("Error in reservation: check-out date must be after check-in date");
 		}
 		this.checkIn = checkIn;
 		this.checkOut = checkOut;
-		
-		return null; // caso, nao entre em nenhum dos if's, retorna nulo
-	}
+
+	} 
 	
 	@Override
 	public String toString() {
